@@ -134,7 +134,8 @@ async def poll_twitch():
                     )
                     embed.add_field(name="Game", value=stream.get("game_name", "Unknown"))
                     embed.add_field(name="Viewers", value=stream.get("viewer_count", 0))
-                    embed.set_thumbnail(url=stream['thumbnail_url'].replace("{width}x{height}", "1280x720"))
+                    embed.set_thumbnail(url=<profile_pic_url>)  # small profile pic top right
+                    embed.set_image(url=stream['thumbnail_url'].replace("{width}x{height}", "1280x720"))  # big stream preview
                     live_message = await channel.send(content="@everyone", embed=embed)
                 elif not is_live and was_live and live_message:
                     vod_url = await get_vod(session, twitch_token, TWITCH_USERNAME)
