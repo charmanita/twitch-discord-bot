@@ -119,36 +119,40 @@ async def poll_twitch():
         except discord.HTTPException as e:
             print(f"Could not set avatar: {e}")
         while not client.is_closed():
-            stream = await get_stream(session, twitch_token, TWITCH_USERNAME)
-            is_live = stream is not None
+            try:
+                stream = await get_stream(session, twitch_token, TWITCH_USERNAME)
+                is_live = stream is not None
 
-            if is_live and not was_live:
-                # Poofed is live! Sending alert now... 
-                last_vod_id = stream["id"]
-                embed = discord.Embed(
-                    title=f" {stream['user_name']} is now live!",
-                    description=stream.get("title", ""),
-                    url=f"https://twitch.tv/{TWITCH_USERNAME}",
-                    color=0x9146FF
-                )
-                embed.add_field(name="Game", value=stream.get("game_name", "Unknown"))
-                embed.add_field(name="Viewers", value=stream.get("viewer_count", 0))
-                embed.set_thumbnail(url=stream['thumbnail_url'].replace("{width}x{height}", "1280x720"))
-                live_message = await channel.send(embed=embed)
-            elif not is_live and was_live and live_message:
-                vod_url = await get_vod(session, twitch_token, TWITCH_USERNAME)
-                embed = discord.Embed(
-                    title=f"{TWITCH_USERNAME} was live",
-                    color=0x6441A5,
-                )
-                if vod_url: 
-                    embed.add_field(name="Watch VOD", value=vod_url)
-                else:
-                    embed.add_field(name="VOD", value="Not available.")
-                await live_message.edit(embed=embed)
-                live_message = None
+                if is_live and not was_live:
+                    # Streamer is live! Sending alert now... 
+                    last_vod_id = stream["id"]
+                    embed = discord.Embed(
+                        title=f" {stream['user_name']} is now live!",
+                        description=stream.get("title", ""),
+                        url=f"https://twitch.tv/{TWITCH_USERNAME}",
+                        color=0x9146FF
+                    )
+                    embed.add_field(name="Game", value=stream.get("game_name", "Unknown"))
+                    embed.add_field(name="Viewers", value=stream.get("viewer_count", 0))
+                    embed.set_thumbnail(url=stream['thumbnail_url'].replace("{width}x{height}", "1280x720"))
+                    live_message = await channel.send(content="@everyone", embed=embed)
+                elif not is_live and was_live and live_message:
+                    vod_url = await get_vod(session, twitch_token, TWITCH_USERNAME)
+                    embed = discord.Embed(
+                        title=f"{TWITCH_USERNAME} was live",
+                        color=0x6441A5,
+                    )
+                    if vod_url: 
+                        embed.add_field(name="Watch VOD", value=vod_url)
+                    else:
+                        embed.add_field(name="VOD", value="Not available.")
+                    await live_message.edit(embed=embed)
+                    live_message = None
+                was_live = is_live
+            
+            except Exception as e:
+                print(f"Error during poll: {e}, retrying in {POLL_INTERVAL}s...")
 
-            was_live = is_live
             await asyncio.sleep(POLL_INTERVAL)
 
 
