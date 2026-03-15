@@ -23,6 +23,7 @@ was_live = False     # Tracks to previous state to avoid dupe alerts.
 live_message = None # Stores sent Discord message to edit later. 
 last_vod_id = None # Stores stream ID for VOD lookup post-stream. 
 # ------------------------------------------------------------------------------
+# Set Bot Avatar to Twitch Streamer Avatar
 async def set_bot_avatar(session, token, username):
     headers = {
         "Client-ID": TWITCH_CLIENT_ID,
@@ -44,6 +45,7 @@ async def set_bot_avatar(session, token, username):
         avatar_bytes = await r.read()
         await client.user.edit(avatar=avatar_bytes)
         print(f"Bot avatar set to {username}'s profile picture.")
+# Get Twitch Token.
 async def get_twitch_token(session):
     url = "https://id.twitch.tv/oauth2/token"
     params = {
@@ -55,7 +57,7 @@ async def get_twitch_token(session):
         data = await r.json()
         return data ["access_token"]
     
-
+# Function for getting stream
 async def get_stream(session, token, username):
     url = "https://api.twitch.tv/helix/streams"
     headers = {
