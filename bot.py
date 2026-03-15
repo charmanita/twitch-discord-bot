@@ -25,10 +25,12 @@ twitch_token = None
 was_live = False     # Tracks to previous state to avoid dupe alerts.
 live_message = None # Stores sent Discord message to edit later. 
 last_vod_id = None # Stores stream ID for VOD lookup post-stream. 
+streamer_avatar_url = None 
 # ------------------------------------------------------------------------------
 # Fetches the streamer's Twitch profile picture and sets it as the bot's Discord avatar.
 # Only runs on startup. Note: Discord rate limits avatar changes to ~2 per hour. 
 async def set_bot_avatar(session, token, username):
+    global streamer_avatar_url
     headers = {
         "Client-ID": TWITCH_CLIENT_ID,
         "Authorization": f"Bearer {token}",
@@ -44,6 +46,7 @@ async def set_bot_avatar(session, token, username):
         if not users:
             return
         avatar_url = users[0]["profile_image_url"]
+        streamer_avatar_url = avatar_url # Save it globally.
     # Download image and set it as bot's avatar
     async with session.get(avatar_url) as r:
         avatar_bytes = await r.read()
@@ -134,7 +137,7 @@ async def poll_twitch():
                     )
                     embed.add_field(name="Game", value=stream.get("game_name", "Unknown"))
                     embed.add_field(name="Viewers", value=stream.get("viewer_count", 0))
-                    embed.set_thumbnail(url=<profile_pic_url>)  # small profile pic top right
+                    embed.set_thumbnail(url=streamer_avatar_url)  # small profile pic top right
                     embed.set_image(url=stream['thumbnail_url'].replace("{width}x{height}", "1280x720"))  # big stream preview
                     live_message = await channel.send(content="@everyone", embed=embed)
                 elif not is_live and was_live and live_message:
