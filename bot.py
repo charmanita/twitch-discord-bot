@@ -164,7 +164,7 @@ async def poll_twitch():
 async def on_ready():
     print(f"Logged in as {client.user}")
     target_user = await self.fetch_user(485957450009149451)
-    await target_user.send("https://www.twitch.tv/charmanita")
+    await target_user.send("hi im online")
     await client.change_presence(
         activity=discord.Activity(
             type=discord.ActivityType.watching,
