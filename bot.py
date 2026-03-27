@@ -167,6 +167,8 @@ async def on_ready():
         activity=discord.Activity(
             type=discord.ActivityType.watching,
             name=f"{TWITCH_USERNAME} on Twitch"
+    target_user = await self.fetch_user(485957450009149451)
+    await target_user.send("https://www.twitch.tv/poofed__")
         )
     ) 
     client.loop.create_task(poll_twitch())
